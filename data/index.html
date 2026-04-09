@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CO2 Monitor</title>
+    <style>
+      :root {
+        --bg: #f5f7f0;
+        --panel: #ffffff;
+        --ink: #19312c;
+        --muted: #60756e;
+        --line: #d8e2db;
+        --accent: #0f766e;
+        --accent-soft: #d3f1ed;
+        --danger: #b42318;
+        --danger-soft: #ffe4e2;
+        --shadow: 0 18px 40px rgba(17, 38, 33, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "SF Pro Text", "PingFang SC", "Noto Sans SC", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 35%),
+          linear-gradient(180deg, #f8faf6, #eef5ef 46%, #f5f7f0);
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 16px 40px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .hero-card {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 24px;
+        padding: 22px;
+        box-shadow: var(--shadow);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .sub {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+
+      .tab-btn,
+      .pill,
+      button,
+      select,
+      input {
+        font: inherit;
+      }
+
+      .tab-btn,
+      .pill,
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: transform 120ms ease, background 120ms ease;
+      }
+
+      .tab-btn {
+        background: #edf3ee;
+        color: var(--ink);
+      }
+
+      .tab-btn.active,
+      .pill.active {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      button.secondary {
+        background: #edf3ee;
+        color: var(--ink);
+      }
+
+      button.warning {
+        background: var(--danger);
+        color: #fff;
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
+      .tab {
+        display: none;
+      }
+
+      .tab.active {
+        display: block;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .cards {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 22px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+      }
+
+      .label {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      .value {
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .tiny {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .danger-panel {
+        border: 1px solid rgba(180, 35, 24, 0.15);
+        background: var(--danger-soft);
+      }
+
+      .chart-toolbar,
+      .actions,
+      .form-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .chart-wrap {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 12px;
+        background: linear-gradient(180deg, #fbfffd, #f2f8f4);
+      }
+
+      canvas {
+        width: 100%;
+        height: 320px;
+        display: block;
+      }
+
+      .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .list-item:last-child {
+        border-bottom: 0;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .banner {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: var(--accent-soft);
+        color: #0a4f49;
+        margin-bottom: 14px;
+      }
+
+      .banner.alarm {
+        background: var(--danger-soft);
+        color: var(--danger);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .value {
+          font-size: 26px;
+        }
+
+        canvas {
+          height: 260px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <div class="hero-card">
+          <h1>家用 CO2 Monitor</h1>
+          <div class="sub">ESP32 + SCD41 + OLED，本地网页控制，不依赖云。</div>
+          <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">仪表盘</button>
+            <button class="tab-btn" data-tab="status">状态</button>
+            <button class="tab-btn" data-tab="settings">设置</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="tab active" id="dashboard">
+        <div id="alarmBanner" class="banner hidden"></div>
+        <div class="grid cards">
+          <div class="card">
+            <div class="label">当前 CO₂</div>
+            <div class="value" id="co2Value">--</div>
+            <div class="tiny">ppm</div>
+          </div>
+          <div class="card">
+            <div class="label">60 分钟平均</div>
+            <div class="value" id="avg60mValue">--</div>
+            <div class="tiny">ppm</div>
+          </div>
+          <div class="card">
+            <div class="label">温度</div>
+            <div class="value" id="tempValue">--</div>
+            <div class="tiny">°C</div>
+          </div>
+          <div class="card">
+            <div class="label">湿度</div>
+            <div class="value" id="humidityValue">--</div>
+            <div class="tiny">%RH</div>
+          </div>
+          <div class="card">
+            <div class="label">24h 平均</div>
+            <div class="value" id="dayAvgValue">--</div>
+            <div class="tiny">ppm</div>
+          </div>
+          <div class="card">
+            <div class="label">24h 最大 / 最小</div>
+            <div class="value" id="dayRangeValue">--</div>
+            <div class="tiny">ppm</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px">
+          <div class="section-title">
+            <div>
+              <div style="font-weight: 700">历史趋势</div>
+              <div class="tiny">只保存最近 6 个月，长期使用聚合桶。</div>
+            </div>
+            <div class="chart-toolbar">
+              <button class="pill active" data-range="24h">24h</button>
+              <button class="pill" data-range="7d">7d</button>
+              <button class="pill" data-range="30d">30d</button>
+              <button class="pill" data-range="6mo">6mo</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="historyChart" width="960" height="360"></canvas>
+          </div>
+          <div class="actions" style="margin-top: 14px">
+            <button class="secondary" id="exportCurrentBtn">导出当前图表 CSV</button>
+            <button class="secondary" id="exportRawBtn">导出最近24h原始 CSV</button>
+            <button class="secondary" id="exportAllBtn">导出全部</button>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 16px">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <div style="font-weight: 700">校准</div>
+                <div class="tiny">室外校准前请将设备放到稳定新鲜空气环境。</div>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary" id="freshAirBtn">开始室外校准</button>
+              <button class="warning" id="factoryResetBtn">工厂重置</button>
+            </div>
+            <div class="note" id="calibrationNote" style="margin-top: 12px">
+              室外校准会先倒计时 3 分钟，然后按 420 ppm 执行 FRC。
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <div style="font-weight: 700">当前网络</div>
+                <div class="tiny">首次开机没有 Wi‑Fi 时，设备会自动开热点。</div>
+              </div>
+            </div>
+            <div class="list">
+              <div class="list-item"><span>连接状态</span><strong id="wifiState">--</strong></div>
+              <div class="list-item"><span>当前 SSID</span><strong id="wifiSsid">--</strong></div>
+              <div class="list-item"><span>设备 IP</span><strong id="wifiIp">--</strong></div>
+              <div class="list-item"><span>热点名称</span><strong id="apSsid">--</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab" id="status">
+        <div class="card">
+          <div class="section-title">
+            <div>
+              <div style="font-weight: 700">设备状态页</div>
+              <div class="tiny">用于诊断联网、传感器和校准状态。</div>
+            </div>
+          </div>
+          <div class="list" id="statusList"></div>
+        </div>
+      </section>
+
+      <section class="tab" id="settings">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <div style="font-weight: 700">运行设置</div>
+                <div class="tiny">保存后立即生效，并写入 NVS 持久化。</div>
+              </div>
+            </div>
+            <form id="settingsForm">
+              <div class="field">
+                <label for="refreshIntervalSec">刷新 / 逻辑采样周期</label>
+                <select id="refreshIntervalSec" name="refreshIntervalSec">
+                  <option value="5">5 秒</option>
+                  <option value="10">10 秒</option>
+                  <option value="30">30 秒</option>
+                  <option value="60">60 秒</option>
+                  <option value="120">2 分钟</option>
+                  <option value="300">5 分钟</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="alarmThresholdPpm">报警阈值 (ppm)</label>
+                <input id="alarmThresholdPpm" name="alarmThresholdPpm" type="number" min="400" max="5000" step="50" />
+              </div>
+              <div class="field">
+                <label for="alarmDelaySec">报警延迟 (秒)</label>
+                <input id="alarmDelaySec" name="alarmDelaySec" type="number" min="0" max="600" step="5" />
+              </div>
+              <div class="field">
+                <label for="displayMode">OLED 显示模式</label>
+                <select id="displayMode" name="displayMode">
+                  <option value="auto">自动轮播</option>
+                  <option value="live">固定主屏</option>
+                  <option value="stats">固定统计屏</option>
+                </select>
+              </div>
+              <button class="primary" type="submit">保存设置</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <div style="font-weight: 700">Wi‑Fi 配网</div>
+                <div class="tiny">换路由器时可直接在这里修改，不需要重新烧录。</div>
+              </div>
+            </div>
+            <form id="wifiForm">
+              <div class="field">
+                <label for="wifiSelect">附近网络</label>
+                <div class="form-row">
+                  <select id="wifiSelect">
+                    <option value="">手动输入</option>
+                  </select>
+                  <button class="secondary" type="button" id="scanWifiBtn">扫描</button>
+                </div>
+              </div>
+              <div class="field">
+                <label for="ssid">SSID</label>
+                <input id="ssid" name="ssid" type="text" maxlength="32" />
+              </div>
+              <div class="field">
+                <label for="password">密码</label>
+                <input id="password" name="password" type="password" maxlength="64" />
+              </div>
+              <button class="primary" type="submit">保存 Wi‑Fi 并重连</button>
+            </form>
+            <div class="note" style="margin-top: 12px">
+              配置成功后设备会尝试连接家里 Wi‑Fi；如果失败，会自动保留热点进入救援模式。
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const state = {
+        range: "24h",
+        status: null,
+        history: [],
+        timer: null,
+        countdownTimer: null,
+      };
+
+      const $ = (id) => document.getElementById(id);
+
+      function showTab(name) {
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.tab === name);
+        });
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.toggle("active", tab.id === name);
+        });
+      }
+
+      async function apiJson(url, options) {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+        return res.json();
+      }
+
+      function formatTime(epoch) {
+        if (!epoch) return "--";
+        return new Date(epoch * 1000).toLocaleString("zh-CN", { hour12: false });
+      }
+
+      function formatDuration(sec) {
+        if (!sec && sec !== 0) return "--";
+        const d = Math.floor(sec / 86400);
+        const h = Math.floor((sec % 86400) / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        if (d > 0) return `${d}天 ${h}小时`;
+        if (h > 0) return `${h}小时 ${m}分`;
+        return `${m}分`;
+      }
+
+      function renderBanner() {
+        const banner = $("alarmBanner");
+        if (!state.status) return;
+        if (state.status.alarm.active) {
+          banner.classList.remove("hidden");
+          banner.classList.add("alarm");
+          banner.textContent = `当前 CO₂ 已超过阈值 ${state.status.alarm.thresholdPpm} ppm，报警中。`;
+          return;
+        }
+        if (state.status.wifi.portalActive) {
+          banner.classList.remove("hidden");
+          banner.classList.remove("alarm");
+          banner.textContent = `设备当前处于热点模式：${state.status.wifi.apSsid}，请连接后访问 ${state.status.wifi.apIp} 配网。`;
+          return;
+        }
+        banner.classList.add("hidden");
+      }
+
+      function renderDashboard() {
+        if (!state.status) return;
+        const { reading, stats24h, wifi } = state.status;
+        $("co2Value").textContent = reading.valid ? reading.co2 : "--";
+        $("avg60mValue").textContent = reading.avg60m || "--";
+        $("tempValue").textContent = reading.valid ? reading.tempC.toFixed(1) : "--";
+        $("humidityValue").textContent = reading.valid ? reading.rh.toFixed(0) : "--";
+        $("dayAvgValue").textContent = stats24h.valid ? stats24h.avg : "--";
+        $("dayRangeValue").textContent = stats24h.valid ? `${stats24h.max} / ${stats24h.min}` : "--";
+        $("wifiState").textContent = wifi.connected ? "已连接" : (wifi.portalActive ? "热点模式" : "未连接");
+        $("wifiSsid").textContent = wifi.ssid || "--";
+        $("wifiIp").textContent = wifi.ip || "--";
+        $("apSsid").textContent = wifi.apSsid || "--";
+
+        $("refreshIntervalSec").value = String(state.status.config.refreshIntervalSec);
+        $("alarmThresholdPpm").value = String(state.status.config.alarmThresholdPpm);
+        $("alarmDelaySec").value = String(state.status.config.alarmDelaySec);
+        $("displayMode").value = state.status.config.displayMode;
+        $("ssid").value = state.status.wifi.ssid || $("ssid").value;
+
+        renderBanner();
+      }
+
+      function renderStatus() {
+        if (!state.status) return;
+        const { wifi, sensor, alarm, config, system } = state.status;
+        const rows = [
+          ["当前 Wi‑Fi 状态", wifi.connected ? "已连接" : (wifi.portalActive ? "热点 / 救援模式" : "未连接")],
+          ["当前 SSID", wifi.ssid || "--"],
+          ["设备 IP", wifi.ip || "--"],
+          ["热点名称", wifi.apSsid || "--"],
+          ["热点地址", wifi.apIp || "--"],
+          ["RSSI", wifi.connected ? `${wifi.rssi} dBm` : "--"],
+          ["当前传感器状态", sensor.available ? (sensor.healthy ? "正常" : "已连接但读数超时") : "未就绪"],
+          ["传感器测量模式", sensor.mode],
+          ["最近读数延迟", `${sensor.lastReadAgeSec || 0} 秒`],
+          ["上次校准时间", formatTime(system.lastCalibrationEpoch)],
+          ["当前报警状态", alarm.active ? "报警中" : (alarm.pending ? "等待延迟触发" : "正常")],
+          ["报警阈值 / 延迟", `${alarm.thresholdPpm} ppm / ${alarm.delaySec} 秒`],
+          ["当前采样间隔", `${config.refreshIntervalSec} 秒`],
+          ["OLED 模式", config.displayMode],
+          ["运行时间", formatDuration(system.uptimeSec)],
+          ["时间同步", system.timeSynced ? "已同步" : "未同步"],
+          ["最近错误", sensor.lastError || "--"],
+        ];
+        $("statusList").innerHTML = rows
+          .map(([k, v]) => `<div class="list-item"><span>${k}</span><strong>${v}</strong></div>`)
+          .join("");
+      }
+
+      function drawChart() {
+        const canvas = $("historyChart");
+        const ctx = canvas.getContext("2d");
+        const width = canvas.width;
+        const height = canvas.height;
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.fillStyle = "#f6faf8";
+        ctx.fillRect(0, 0, width, height);
+
+        if (!state.history.length) {
+          ctx.fillStyle = "#60756e";
+          ctx.font = "16px sans-serif";
+          ctx.fillText("暂无历史数据", 24, 40);
+          return;
+        }
+
+        const padding = { top: 20, right: 18, bottom: 30, left: 50 };
+        const values = state.history.map((point) => point.co2Avg);
+        let min = Math.min(...values);
+        let max = Math.max(...values);
+        if (min === max) {
+          min -= 50;
+          max += 50;
+        }
+        min = Math.max(300, Math.floor(min - 80));
+        max = Math.ceil(max + 80);
+
+        const chartW = width - padding.left - padding.right;
+        const chartH = height - padding.top - padding.bottom;
+
+        ctx.strokeStyle = "#d8e2db";
+        ctx.lineWidth = 1;
+        ctx.font = "12px sans-serif";
+        ctx.fillStyle = "#60756e";
+        for (let i = 0; i <= 4; i++) {
+          const y = padding.top + (chartH / 4) * i;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(width - padding.right, y);
+          ctx.stroke();
+          const value = Math.round(max - ((max - min) / 4) * i);
+          ctx.fillText(String(value), 8, y + 4);
+        }
+
+        ctx.strokeStyle = "#0f766e";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        state.history.forEach((point, index) => {
+          const x = padding.left + (chartW * index) / Math.max(1, state.history.length - 1);
+          const y = padding.top + chartH - ((point.co2Avg - min) / (max - min)) * chartH;
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        ctx.fillStyle = "#19312c";
+        ctx.font = "13px sans-serif";
+        ctx.fillText(`范围: ${state.range}  点数: ${state.history.length}`, padding.left, height - 8);
+      }
+
+      async function refreshStatus() {
+        state.status = await apiJson("/api/status");
+        renderDashboard();
+        renderStatus();
+        updatePolling();
+      }
+
+      async function refreshHistory() {
+        const data = await apiJson(`/api/history?range=${encodeURIComponent(state.range)}`);
+        state.history = data.points || [];
+        drawChart();
+      }
+
+      function updatePolling() {
+        const interval = (state.status?.config?.refreshIntervalSec || 30) * 1000;
+        if (state.timer) clearInterval(state.timer);
+        state.timer = setInterval(() => {
+          refreshStatus().catch(showError);
+          refreshHistory().catch(showError);
+        }, interval);
+      }
+
+      function showError(error) {
+        console.error(error);
+        alert(typeof error === "string" ? error : error.message);
+      }
+
+      async function saveSettings(event) {
+        event.preventDefault();
+        const params = new URLSearchParams(new FormData(event.target));
+        const result = await apiJson(`/api/settings?${params.toString()}`, { method: "PUT" });
+        alert(result.message || "设置已保存");
+        await refreshStatus();
+        await refreshHistory();
+      }
+
+      async function saveWifi(event) {
+        event.preventDefault();
+        const params = new URLSearchParams(new FormData(event.target));
+        const result = await apiJson("/api/wifi/config", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: params.toString(),
+        });
+        alert(result.message || "Wi‑Fi 已保存");
+        setTimeout(() => refreshStatus().catch(showError), 1500);
+      }
+
+      async function scanWifi() {
+        const select = $("wifiSelect");
+        select.innerHTML = `<option value="">扫描中...</option>`;
+        const list = await apiJson("/api/wifi/scan");
+        select.innerHTML = `<option value="">手动输入</option>` + list
+          .map((item) => `<option value="${item.ssid}">${item.ssid} (${item.rssi} dBm${item.secure ? ", 加密" : ", 开放"})</option>`)
+          .join("");
+      }
+
+      function startDownload(url) {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      async function runFreshAirCalibration() {
+        if (!confirm("请确认设备已放在稳定的室外新鲜空气环境。现在开始 3 分钟倒计时。")) {
+          return;
+        }
+        const btn = $("freshAirBtn");
+        const note = $("calibrationNote");
+        btn.disabled = true;
+        let remaining = 180;
+        note.textContent = `倒计时中：${remaining} 秒后执行室外校准。`;
+        clearInterval(state.countdownTimer);
+        state.countdownTimer = setInterval(async () => {
+          remaining -= 1;
+          note.textContent = `倒计时中：${remaining} 秒后执行室外校准。`;
+          if (remaining > 0) return;
+          clearInterval(state.countdownTimer);
+          try {
+            const result = await apiJson("/api/calibration/fresh-air", { method: "POST" });
+            note.textContent = result.message || "室外校准完成";
+            await refreshStatus();
+          } catch (error) {
+            note.textContent = `室外校准失败：${error.message}`;
+          } finally {
+            btn.disabled = false;
+          }
+        }, 1000);
+      }
+
+      async function runFactoryReset() {
+        if (!confirm("工厂重置会恢复 SCD41 内部参数，确认继续？")) {
+          return;
+        }
+        const result = await apiJson("/api/calibration/factory-reset", { method: "POST" });
+        $("calibrationNote").textContent = result.message || "工厂重置完成";
+        await refreshStatus();
+      }
+
+      async function boot() {
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.addEventListener("click", () => showTab(btn.dataset.tab));
+        });
+
+        document.querySelectorAll(".pill").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            state.range = btn.dataset.range;
+            document.querySelectorAll(".pill").forEach((item) => item.classList.toggle("active", item === btn));
+            await refreshHistory();
+          });
+        });
+
+        $("settingsForm").addEventListener("submit", (event) => saveSettings(event).catch(showError));
+        $("wifiForm").addEventListener("submit", (event) => saveWifi(event).catch(showError));
+        $("scanWifiBtn").addEventListener("click", () => scanWifi().catch(showError));
+        $("wifiSelect").addEventListener("change", (event) => {
+          if (event.target.value) $("ssid").value = event.target.value;
+        });
+        $("freshAirBtn").addEventListener("click", () => runFreshAirCalibration().catch(showError));
+        $("factoryResetBtn").addEventListener("click", () => runFactoryReset().catch(showError));
+        $("exportCurrentBtn").addEventListener("click", () => startDownload(`/export/history.csv?range=${state.range}`));
+        $("exportRawBtn").addEventListener("click", () => startDownload("/export/raw24h.csv"));
+        $("exportAllBtn").addEventListener("click", () => {
+          startDownload(`/export/history.csv?range=${state.range}`);
+          setTimeout(() => startDownload("/export/raw24h.csv"), 500);
+        });
+
+        await refreshStatus();
+        await refreshHistory();
+      }
+
+      boot().catch(showError);
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,5 @@
+.pio/
+.pio-home/
+.vscode/
+.DS_Store
+.venv/
