@@ -643,7 +643,7 @@
       }
 
       function updatePolling() {
-        const interval = (state.status?.config?.refreshIntervalSec || 30) * 1000;
+        const interval = (state.status?.config?.refreshIntervalSec || 5) * 1000;
         if (state.timer) clearInterval(state.timer);
         state.timer = setInterval(() => {
           refreshStatus().catch(showError);
@@ -767,4 +767,3 @@
     </script>
   </body>
 </html>
-

@@ -19,7 +19,7 @@ bool ConfigStore::begin() {
     }
 
     config_.refreshIntervalSec =
-        sanitizeRefreshInterval(preferences_.getUShort(kRefreshKey, 30));
+        sanitizeRefreshInterval(preferences_.getUShort(kRefreshKey, 5));
     config_.alarmThresholdPpm =
         sanitizeAlarmThreshold(preferences_.getUShort(kAlarmPpmKey, 1200));
     config_.alarmDelaySec =

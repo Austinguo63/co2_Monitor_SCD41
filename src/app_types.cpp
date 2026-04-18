@@ -72,7 +72,7 @@ bool isRefreshIntervalValid(uint16_t refreshIntervalSec) {
 }
 
 uint16_t sanitizeRefreshInterval(uint16_t refreshIntervalSec) {
-    return isRefreshIntervalValid(refreshIntervalSec) ? refreshIntervalSec : 30;
+    return isRefreshIntervalValid(refreshIntervalSec) ? refreshIntervalSec : 5;
 }
 
 uint16_t sanitizeAlarmThreshold(uint16_t thresholdPpm) {
@@ -103,4 +103,3 @@ uint32_t currentEpoch() {
 }
 
 bool isTimeSynchronized() { return currentEpoch() != 0; }
-

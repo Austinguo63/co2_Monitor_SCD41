@@ -21,7 +21,7 @@ enum class HistoryRange : uint8_t {
 };
 
 struct AppConfig {
-    uint16_t refreshIntervalSec = 30;
+    uint16_t refreshIntervalSec = 5;
     uint16_t alarmThresholdPpm = 1200;
     uint16_t alarmDelaySec = 30;
     DisplayMode displayMode = DisplayMode::Auto;
