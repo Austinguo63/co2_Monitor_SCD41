@@ -36,7 +36,7 @@ void setup() {
     Serial.println();
     Serial.println("Starting CO2 monitor...");
 
-    LittleFS.begin(true);
+    LittleFS.begin(true, "/littlefs", 10, kFilesystemPartitionLabel);
     gConfigStore.begin();
     gHistoryStore.begin();
 

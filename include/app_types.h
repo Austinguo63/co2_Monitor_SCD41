@@ -48,6 +48,8 @@ struct HistoryStats {
     uint16_t maxPpm = 0;
 };
 
+constexpr const char* kFilesystemPartitionLabel = "storage";
+
 const char* displayModeToString(DisplayMode mode);
 DisplayMode parseDisplayMode(const String& value);
 
@@ -62,4 +64,3 @@ uint16_t sanitizeAlarmDelay(uint16_t delaySec);
 SensorMeasurementMode measurementModeForRefresh(uint16_t refreshIntervalSec);
 uint32_t currentEpoch();
 bool isTimeSynchronized();
-

@@ -19,7 +19,7 @@ const HistoryStore::RingSpec HistoryStore::k6moSpec = {
     "/hist_6mo.bin", kHistoryMagicBase + 5, sizeof(BucketRecord), 372};
 
 bool HistoryStore::begin() {
-    if (!LittleFS.begin(true)) {
+    if (!LittleFS.begin(true, "/littlefs", 10, kFilesystemPartitionLabel)) {
         return false;
     }
     return ensureRing(kRawSpec) && ensureRing(k24hSpec) && ensureRing(k7dSpec) &&
