@@ -3,19 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CO2 Monitor</title>
+    <title>CO2 Monitor Local UI</title>
     <style>
       :root {
-        --bg: #f5f7f0;
+        color-scheme: light;
+        --bg: #edf4ef;
         --panel: #ffffff;
-        --ink: #19312c;
-        --muted: #60756e;
-        --line: #d8e2db;
-        --accent: #0f766e;
-        --accent-soft: #d3f1ed;
-        --danger: #b42318;
-        --danger-soft: #ffe4e2;
-        --shadow: 0 18px 40px rgba(17, 38, 33, 0.08);
+        --line: #d4e0d7;
+        --text: #15221d;
+        --muted: #5e7469;
+        --accent: #126b5b;
+        --accent-soft: #d7eee8;
+        --warn: #b45309;
+        --warn-soft: #fff1df;
+        --danger: #a11c1c;
+        --danger-soft: #fde7e7;
       }
 
       * {
@@ -24,56 +26,54 @@
 
       body {
         margin: 0;
-        font-family: "SF Pro Text", "PingFang SC", "Noto Sans SC", sans-serif;
-        color: var(--ink);
+        font-family: "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+        color: var(--text);
         background:
-          radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 35%),
-          linear-gradient(180deg, #f8faf6, #eef5ef 46%, #f5f7f0);
+          radial-gradient(circle at top left, #ffffff 0, #edf4ef 38%, #dfe9e2 100%);
       }
 
       .wrap {
-        max-width: 1100px;
+        max-width: 1180px;
         margin: 0 auto;
-        padding: 20px 16px 40px;
+        padding: 28px 18px 48px;
       }
 
       .hero {
         display: grid;
-        gap: 16px;
-        margin-bottom: 20px;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .hero-card,
+      .card {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(212, 224, 215, 0.85);
+        border-radius: 22px;
+        box-shadow: 0 18px 45px rgba(27, 49, 44, 0.08);
+        backdrop-filter: blur(16px);
       }
 
       .hero-card {
-        background: var(--panel);
-        border: 1px solid rgba(255, 255, 255, 0.7);
-        border-radius: 24px;
-        padding: 22px;
-        box-shadow: var(--shadow);
+        padding: 26px;
       }
 
       h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
+        margin: 0;
+        font-size: 34px;
+        letter-spacing: -0.04em;
       }
 
       .sub {
+        margin-top: 10px;
         color: var(--muted);
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .tabs {
         display: flex;
-        gap: 8px;
+        gap: 10px;
+        margin-top: 18px;
         flex-wrap: wrap;
-        margin-top: 14px;
-      }
-
-      .tab-btn,
-      .pill,
-      button,
-      select,
-      input {
-        font: inherit;
       }
 
       .tab-btn,
@@ -81,14 +81,15 @@
       button {
         border: 0;
         border-radius: 999px;
-        padding: 10px 14px;
         cursor: pointer;
-        transition: transform 120ms ease, background 120ms ease;
+        transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
       }
 
       .tab-btn {
-        background: #edf3ee;
-        color: var(--ink);
+        padding: 10px 16px;
+        background: #eef3f0;
+        color: var(--text);
+        font-weight: 600;
       }
 
       .tab-btn.active,
@@ -97,24 +98,10 @@
         color: #fff;
       }
 
-      button.primary {
-        background: var(--accent);
-        color: #fff;
-      }
-
-      button.secondary {
-        background: #edf3ee;
-        color: var(--ink);
-      }
-
-      button.warning {
-        background: var(--danger);
-        color: #fff;
-      }
-
-      button:disabled {
-        opacity: 0.65;
-        cursor: wait;
+      .tab-btn:hover,
+      .pill:hover,
+      button:hover {
+        transform: translateY(-1px);
       }
 
       .tab {
@@ -131,27 +118,23 @@
       }
 
       .cards {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
       }
 
       .card {
-        background: var(--panel);
-        border: 1px solid rgba(255, 255, 255, 0.7);
-        border-radius: 22px;
-        padding: 18px;
-        box-shadow: var(--shadow);
+        padding: 20px;
       }
 
       .label {
         font-size: 13px;
         color: var(--muted);
-        margin-bottom: 6px;
       }
 
       .value {
-        font-size: 30px;
+        margin-top: 10px;
+        font-size: 40px;
         font-weight: 700;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.05em;
       }
 
       .tiny {
@@ -159,39 +142,58 @@
         color: var(--muted);
       }
 
-      .danger-panel {
-        border: 1px solid rgba(180, 35, 24, 0.15);
-        background: var(--danger-soft);
-      }
-
-      .chart-toolbar,
-      .actions,
-      .form-row {
+      .section-title {
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
         align-items: center;
       }
 
-      .chart-wrap {
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 12px;
-        background: linear-gradient(180deg, #fbfffd, #f2f8f4);
+      .chart-toolbar,
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        padding: 8px 14px;
+        background: #eef3f0;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
       }
 
       canvas {
         width: 100%;
-        height: 320px;
-        display: block;
+        height: auto;
+        border-radius: 18px;
+        background: #f7fbf8;
+        border: 1px solid #e5ede8;
       }
 
-      .section-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
+      .banner {
+        margin-bottom: 16px;
+        padding: 14px 18px;
+        border-radius: 18px;
+        font-size: 14px;
+        border: 1px solid transparent;
+      }
+
+      .banner.alarm {
+        background: var(--danger-soft);
+        border-color: #efc2c2;
+        color: var(--danger);
+      }
+
+      .banner.info {
+        background: var(--warn-soft);
+        border-color: #f1d4a7;
+        color: var(--warn);
+      }
+
+      .hidden {
+        display: none;
       }
 
       .list {
@@ -201,65 +203,87 @@
 
       .list-item {
         display: flex;
+        align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--line);
+        border-bottom: 1px dashed #dfe8e2;
+        padding-bottom: 10px;
+        font-size: 14px;
       }
 
       .list-item:last-child {
         border-bottom: 0;
-      }
-
-      form {
-        display: grid;
-        gap: 12px;
+        padding-bottom: 0;
       }
 
       .field {
         display: grid;
-        gap: 6px;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 13px;
+        color: var(--muted);
       }
 
       input,
       select {
         width: 100%;
-        padding: 11px 12px;
+        padding: 12px 14px;
         border: 1px solid var(--line);
         border-radius: 14px;
-        background: #fff;
+        font-size: 14px;
+        background: #f9fcfa;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        padding: 11px 18px;
+        font-weight: 700;
+      }
+
+      button.secondary {
+        background: #eef3f0;
+        color: var(--text);
+        padding: 11px 18px;
+        font-weight: 600;
+      }
+
+      button.warning {
+        background: #7f1d1d;
+        color: #fff;
+        padding: 11px 18px;
+        font-weight: 700;
       }
 
       .note {
         font-size: 13px;
-        color: var(--muted);
         line-height: 1.5;
-      }
-
-      .banner {
-        padding: 12px 14px;
-        border-radius: 16px;
-        background: var(--accent-soft);
-        color: #0a4f49;
-        margin-bottom: 14px;
-      }
-
-      .banner.alarm {
-        background: var(--danger-soft);
-        color: var(--danger);
-      }
-
-      .hidden {
-        display: none;
+        color: var(--muted);
       }
 
       @media (max-width: 768px) {
+        .wrap {
+          padding: 18px 14px 36px;
+        }
+
+        .hero-card,
+        .card {
+          border-radius: 18px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
         .value {
-          font-size: 26px;
+          font-size: 28px;
         }
 
         canvas {
-          height: 260px;
+          height: 280px;
         }
       }
     </style>
@@ -269,7 +293,7 @@
       <div class="hero">
         <div class="hero-card">
           <h1>家用 CO2 Monitor</h1>
-          <div class="sub">ESP32 + SCD41 + OLED，本地网页控制，不依赖云。</div>
+          <div class="sub">USB 本地控制模式。通过电脑上的 localhost 页面查看数据、校准和导出，不依赖 Wi‑Fi。</div>
           <div class="tabs">
             <button class="tab-btn active" data-tab="dashboard">仪表盘</button>
             <button class="tab-btn" data-tab="status">状态</button>
@@ -279,7 +303,8 @@
       </div>
 
       <section class="tab active" id="dashboard">
-        <div id="alarmBanner" class="banner hidden"></div>
+        <div id="banner" class="banner hidden"></div>
+
         <div class="grid cards">
           <div class="card">
             <div class="label">当前 CO₂</div>
@@ -317,7 +342,7 @@
           <div class="section-title">
             <div>
               <div style="font-weight: 700">历史趋势</div>
-              <div class="tiny">只保存最近 6 个月，长期使用聚合桶。</div>
+              <div class="tiny">连续供电时自动累积历史；重启后需要重新连电脑同步时间。</div>
             </div>
             <div class="chart-toolbar">
               <button class="pill active" data-range="24h">24h</button>
@@ -326,12 +351,12 @@
               <button class="pill" data-range="6mo">6mo</button>
             </div>
           </div>
-          <div class="chart-wrap">
+          <div style="margin-top: 14px">
             <canvas id="historyChart" width="960" height="360"></canvas>
           </div>
           <div class="actions" style="margin-top: 14px">
             <button class="secondary" id="exportCurrentBtn">导出当前图表 CSV</button>
-            <button class="secondary" id="exportRawBtn">导出最近24h原始 CSV</button>
+            <button class="secondary" id="exportRawBtn">导出最近 24h 原始 CSV</button>
             <button class="secondary" id="exportAllBtn">导出全部</button>
           </div>
         </div>
@@ -341,10 +366,10 @@
             <div class="section-title">
               <div>
                 <div style="font-weight: 700">校准</div>
-                <div class="tiny">室外校准前请将设备放到稳定新鲜空气环境。</div>
+                <div class="tiny">设备已处于 USB 本地控制模式，所有校准操作都通过当前页面发起。</div>
               </div>
             </div>
-            <div class="actions">
+            <div class="actions" style="margin-top: 14px">
               <button class="primary" id="freshAirBtn">开始室外校准</button>
               <button class="warning" id="factoryResetBtn">工厂重置</button>
             </div>
@@ -352,18 +377,19 @@
               室外校准会先倒计时 3 分钟，然后按 420 ppm 执行 FRC。
             </div>
           </div>
+
           <div class="card">
             <div class="section-title">
               <div>
-                <div style="font-weight: 700">当前网络</div>
-                <div class="tiny">首次开机没有 Wi‑Fi 时，设备会自动开热点。</div>
+                <div style="font-weight: 700">本地连接</div>
+                <div class="tiny">页面由电脑代理提供，设备本体默认不会启用 Wi‑Fi / 热点。</div>
               </div>
             </div>
-            <div class="list">
-              <div class="list-item"><span>连接状态</span><strong id="wifiState">--</strong></div>
-              <div class="list-item"><span>当前 SSID</span><strong id="wifiSsid">--</strong></div>
-              <div class="list-item"><span>设备 IP</span><strong id="wifiIp">--</strong></div>
-              <div class="list-item"><span>热点名称</span><strong id="apSsid">--</strong></div>
+            <div class="list" style="margin-top: 14px">
+              <div class="list-item"><span>连接方式</span><strong>USB + localhost</strong></div>
+              <div class="list-item"><span>时间状态</span><strong id="timeState">--</strong></div>
+              <div class="list-item"><span>运行时间</span><strong id="uptimeValue">--</strong></div>
+              <div class="list-item"><span>上次校准时间</span><strong id="lastCalibrationValue">--</strong></div>
             </div>
           </div>
         </div>
@@ -374,10 +400,10 @@
           <div class="section-title">
             <div>
               <div style="font-weight: 700">设备状态页</div>
-              <div class="tiny">用于诊断联网、传感器和校准状态。</div>
+              <div class="tiny">用于诊断传感器、时间同步和本地运行状态。</div>
             </div>
           </div>
-          <div class="list" id="statusList"></div>
+          <div class="list" id="statusList" style="margin-top: 14px"></div>
         </div>
       </section>
 
@@ -390,7 +416,7 @@
                 <div class="tiny">保存后立即生效，并写入 NVS 持久化。</div>
               </div>
             </div>
-            <form id="settingsForm">
+            <form id="settingsForm" style="margin-top: 14px">
               <div class="field">
                 <label for="refreshIntervalSec">刷新 / 逻辑采样周期</label>
                 <select id="refreshIntervalSec" name="refreshIntervalSec">
@@ -425,32 +451,18 @@
           <div class="card">
             <div class="section-title">
               <div>
-                <div style="font-weight: 700">Wi‑Fi 配网</div>
-                <div class="tiny">换路由器时可直接在这里修改，不需要重新烧录。</div>
+                <div style="font-weight: 700">本地模式说明</div>
+                <div class="tiny">当前固件默认无线关闭，电脑连接后由本地代理负责时间同步和网页访问。</div>
               </div>
             </div>
-            <form id="wifiForm">
-              <div class="field">
-                <label for="wifiSelect">附近网络</label>
-                <div class="form-row">
-                  <select id="wifiSelect">
-                    <option value="">手动输入</option>
-                  </select>
-                  <button class="secondary" type="button" id="scanWifiBtn">扫描</button>
-                </div>
-              </div>
-              <div class="field">
-                <label for="ssid">SSID</label>
-                <input id="ssid" name="ssid" type="text" maxlength="32" />
-              </div>
-              <div class="field">
-                <label for="password">密码</label>
-                <input id="password" name="password" type="password" maxlength="64" />
-              </div>
-              <button class="primary" type="submit">保存 Wi‑Fi 并重连</button>
-            </form>
-            <div class="note" style="margin-top: 12px">
-              配置成功后设备会尝试连接家里 Wi‑Fi；如果失败，会自动保留热点进入救援模式。
+            <div class="note" style="margin-top: 14px">
+              1. 插上 USB 线。
+              <br />
+              2. 在电脑上运行 <code>python3 tools/local_ui.py --open</code>。
+              <br />
+              3. 通过 localhost 页面访问设备。
+              <br />
+              4. 如果设备重启，请重新连接页面以恢复绝对时间。
             </div>
           </div>
         </div>
@@ -479,10 +491,11 @@
 
       async function apiJson(url, options) {
         const res = await fetch(url, options);
+        const text = await res.text();
         if (!res.ok) {
-          throw new Error(await res.text());
+          throw new Error(text || `HTTP ${res.status}`);
         }
-        return res.json();
+        return text ? JSON.parse(text) : {};
       }
 
       function formatTime(epoch) {
@@ -501,56 +514,54 @@
       }
 
       function renderBanner() {
-        const banner = $("alarmBanner");
+        const banner = $("banner");
         if (!state.status) return;
+        banner.classList.remove("alarm", "info");
+
         if (state.status.alarm.active) {
           banner.classList.remove("hidden");
           banner.classList.add("alarm");
           banner.textContent = `当前 CO₂ 已超过阈值 ${state.status.alarm.thresholdPpm} ppm，报警中。`;
           return;
         }
-        if (state.status.wifi.portalActive) {
+
+        if (!state.status.system.timeSynced) {
           banner.classList.remove("hidden");
-          banner.classList.remove("alarm");
-          banner.textContent = `设备当前处于热点模式：${state.status.wifi.apSsid}，请连接后访问 ${state.status.wifi.apIp} 配网。`;
+          banner.classList.add("info");
+          banner.textContent = "设备当前还没有绝对时间。请确认本地代理已连接，历史写入会在校时后恢复。";
           return;
         }
+
         banner.classList.add("hidden");
       }
 
       function renderDashboard() {
         if (!state.status) return;
-        const { reading, stats24h, wifi } = state.status;
+        const { reading, stats24h, config, system } = state.status;
         $("co2Value").textContent = reading.valid ? reading.co2 : "--";
         $("avg60mValue").textContent = reading.avg60m || "--";
         $("tempValue").textContent = reading.valid ? reading.tempC.toFixed(1) : "--";
         $("humidityValue").textContent = reading.valid ? reading.rh.toFixed(0) : "--";
         $("dayAvgValue").textContent = stats24h.valid ? stats24h.avg : "--";
         $("dayRangeValue").textContent = stats24h.valid ? `${stats24h.max} / ${stats24h.min}` : "--";
-        $("wifiState").textContent = wifi.connected ? "已连接" : (wifi.portalActive ? "热点模式" : "未连接");
-        $("wifiSsid").textContent = wifi.ssid || "--";
-        $("wifiIp").textContent = wifi.ip || "--";
-        $("apSsid").textContent = wifi.apSsid || "--";
+        $("timeState").textContent = system.timeSynced ? "已同步" : "未同步";
+        $("uptimeValue").textContent = formatDuration(system.uptimeSec);
+        $("lastCalibrationValue").textContent = formatTime(system.lastCalibrationEpoch);
 
-        $("refreshIntervalSec").value = String(state.status.config.refreshIntervalSec);
-        $("alarmThresholdPpm").value = String(state.status.config.alarmThresholdPpm);
-        $("alarmDelaySec").value = String(state.status.config.alarmDelaySec);
-        $("displayMode").value = state.status.config.displayMode;
-        $("ssid").value = state.status.wifi.ssid || $("ssid").value;
+        $("refreshIntervalSec").value = String(config.refreshIntervalSec);
+        $("alarmThresholdPpm").value = String(config.alarmThresholdPpm);
+        $("alarmDelaySec").value = String(config.alarmDelaySec);
+        $("displayMode").value = config.displayMode;
 
         renderBanner();
       }
 
       function renderStatus() {
         if (!state.status) return;
-        const { wifi, sensor, alarm, config, system } = state.status;
+        const { sensor, alarm, config, system } = state.status;
         const rows = [
-          ["当前 Wi‑Fi 状态", wifi.connected ? "已连接" : (wifi.portalActive ? "热点 / 救援模式" : "未连接")],
-          ["当前 SSID", wifi.ssid || "--"],
-          ["设备 IP", wifi.ip || "--"],
-          ["热点名称", wifi.apSsid || "--"],
-          ["热点地址", wifi.apIp || "--"],
-          ["RSSI", wifi.connected ? `${wifi.rssi} dBm` : "--"],
+          ["本地控制方式", "USB + localhost 代理"],
+          ["时间同步", system.timeSynced ? "已同步" : "未同步"],
           ["当前传感器状态", sensor.available ? (sensor.healthy ? "正常" : "已连接但读数超时") : "未就绪"],
           ["传感器测量模式", sensor.mode],
           ["最近读数延迟", `${sensor.lastReadAgeSec || 0} 秒`],
@@ -560,7 +571,6 @@
           ["当前采样间隔", `${config.refreshIntervalSec} 秒`],
           ["OLED 模式", config.displayMode],
           ["运行时间", formatDuration(system.uptimeSec)],
-          ["时间同步", system.timeSynced ? "已同步" : "未同步"],
           ["最近错误", sensor.lastError || "--"],
         ];
         $("statusList").innerHTML = rows
@@ -575,7 +585,7 @@
         const height = canvas.height;
         ctx.clearRect(0, 0, width, height);
 
-        ctx.fillStyle = "#f6faf8";
+        ctx.fillStyle = "#f7fbf8";
         ctx.fillRect(0, 0, width, height);
 
         if (!state.history.length) {
@@ -613,7 +623,7 @@
           ctx.fillText(String(value), 8, y + 4);
         }
 
-        ctx.strokeStyle = "#0f766e";
+        ctx.strokeStyle = "#126b5b";
         ctx.lineWidth = 3;
         ctx.beginPath();
         state.history.forEach((point, index) => {
@@ -663,27 +673,6 @@
         alert(result.message || "设置已保存");
         await refreshStatus();
         await refreshHistory();
-      }
-
-      async function saveWifi(event) {
-        event.preventDefault();
-        const params = new URLSearchParams(new FormData(event.target));
-        const result = await apiJson("/api/wifi/config", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: params.toString(),
-        });
-        alert(result.message || "Wi‑Fi 已保存");
-        setTimeout(() => refreshStatus().catch(showError), 1500);
-      }
-
-      async function scanWifi() {
-        const select = $("wifiSelect");
-        select.innerHTML = `<option value="">扫描中...</option>`;
-        const list = await apiJson("/api/wifi/scan");
-        select.innerHTML = `<option value="">手动输入</option>` + list
-          .map((item) => `<option value="${item.ssid}">${item.ssid} (${item.rssi} dBm${item.secure ? ", 加密" : ", 开放"})</option>`)
-          .join("");
       }
 
       function startDownload(url) {
@@ -745,11 +734,6 @@
         });
 
         $("settingsForm").addEventListener("submit", (event) => saveSettings(event).catch(showError));
-        $("wifiForm").addEventListener("submit", (event) => saveWifi(event).catch(showError));
-        $("scanWifiBtn").addEventListener("click", () => scanWifi().catch(showError));
-        $("wifiSelect").addEventListener("change", (event) => {
-          if (event.target.value) $("ssid").value = event.target.value;
-        });
         $("freshAirBtn").addEventListener("click", () => runFreshAirCalibration().catch(showError));
         $("factoryResetBtn").addEventListener("click", () => runFactoryReset().catch(showError));
         $("exportCurrentBtn").addEventListener("click", () => startDownload(`/export/history.csv?range=${state.range}`));

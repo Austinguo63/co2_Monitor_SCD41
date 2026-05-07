@@ -1,15 +1,17 @@
 #include <Arduino.h>
 #include <LittleFS.h>
+#include <WiFi.h>
 #include <Wire.h>
+#include <esp_bt.h>
 
 #include "alarm_manager.h"
 #include "config_store.h"
+#include "device_api.h"
 #include "display_manager.h"
 #include "history_store.h"
 #include "pins.h"
 #include "sensor_manager.h"
-#include "web_app.h"
-#include "wifi_manager.h"
+#include "serial_rpc_server.h"
 
 namespace {
 TwoWire gScdWire(0);
@@ -20,21 +22,29 @@ HistoryStore gHistoryStore;
 SensorManager gSensorManager;
 AlarmManager gAlarmManager;
 DisplayManager gDisplayManager;
-WifiManager gWifiManager;
-WebApp gWebApp(gConfigStore, gHistoryStore, gSensorManager, gAlarmManager,
-               gWifiManager);
+DeviceApi gDeviceApi(gConfigStore, gHistoryStore, gSensorManager, gAlarmManager);
+SerialRpcServer gSerialRpcServer(gDeviceApi);
 
 uint32_t gLastProcessedReadingUptimeSec = 0;
 uint32_t gLastRawPublishMs = 0;
 uint32_t gLastStatsRefreshMs = 0;
 HistoryStats gCached24hStats;
+
+void disableWirelessRadios() {
+    WiFi.persistent(false);
+    WiFi.disconnect(true, true);
+    WiFi.mode(WIFI_OFF);
+    esp_bt_controller_mem_release(ESP_BT_MODE_BTDM);
+}
 }  // namespace
 
 void setup() {
     Serial.begin(115200);
     delay(200);
     Serial.println();
-    Serial.println("Starting CO2 monitor...");
+    Serial.println("Starting CO2 monitor in local USB mode...");
+
+    disableWirelessRadios();
 
     LittleFS.begin(true, "/littlefs", 10, kFilesystemPartitionLabel);
     gConfigStore.begin();
@@ -50,15 +60,13 @@ void setup() {
     gSensorManager.setMeasurementMode(
         measurementModeForRefresh(config.refreshIntervalSec));
     gDisplayManager.begin(gOledWire, kOledAddress);
-    gWifiManager.begin(config);
-    gWebApp.begin();
+    gSerialRpcServer.begin(Serial);
 }
 
 void loop() {
     const AppConfig& config = gConfigStore.config();
 
-    gWifiManager.loop(config);
-    gWebApp.loop();
+    gSerialRpcServer.loop();
 
     gSensorManager.setMeasurementMode(
         measurementModeForRefresh(config.refreshIntervalSec));
@@ -107,10 +115,10 @@ void loop() {
     }
     snapshot.avg60m = gSensorManager.rollingAverage60Min();
     snapshot.stats24h = gCached24hStats;
-    snapshot.wifiConnected = gWifiManager.isConnected();
-    snapshot.portalActive = gWifiManager.isPortalActive();
+    snapshot.wifiConnected = false;
+    snapshot.portalActive = false;
     snapshot.alarmActive = gAlarmManager.isActive();
-    snapshot.timeSynced = gWifiManager.isTimeSynced();
+    snapshot.timeSynced = isTimeSynchronized();
 
     gDisplayManager.loop(snapshot, config.displayMode);
     delay(10);

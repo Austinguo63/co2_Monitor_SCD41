@@ -77,13 +77,7 @@ void DisplayManager::renderLive(const DisplaySnapshot& snapshot) {
     display_->printf("T %.1fC  H %.0f%%", snapshot.temperatureC, snapshot.humidity);
 
     display_->setCursor(0, 57);
-    if (snapshot.portalActive) {
-        display_->print("AP");
-    } else if (snapshot.wifiConnected) {
-        display_->print("WiFi");
-    } else {
-        display_->print("OFF");
-    }
+    display_->print("USB");
     display_->print(" 60m ");
     if (snapshot.avg60m > 0) {
         display_->print(snapshot.avg60m);
@@ -138,4 +132,3 @@ void DisplayManager::renderStats(const DisplaySnapshot& snapshot) {
         display_->print("--");
     }
 }
-
